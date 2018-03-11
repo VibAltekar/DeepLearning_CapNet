@@ -10,8 +10,6 @@ from torch.autograd import Variable
 
 
 def one_hot(labels):
-    # make one hot label
-    # input size: [batch_size]
     out = []
     for i, label in enumerate(labels):
         out.append(np.zeros(10))
@@ -45,24 +43,19 @@ def Marginloss(v_length, target):
     lambda_val = Variable(torch.Tensor(np.array(np.tile(lambda_value, [batch_size, 10]))))
     zero = Variable(torch.zeros(batch_size, 10, 1, 1))
     ones = Variable(torch.ones(batch_size, 10))
-    # [batch_size, 10, 1, 1]
-    # max_l = max(0, m_plus-||v_c||)^2
-    #max_l = torch.max(zero, m_plus - v_length)
+
     max_l = m_plus - v_length
     max_l = torch.mul(max_l, max_l)
-    # max_r = max(0, ||v_c||-m_minus)^2
-    #max_r = torch.max(zero, v_length - m_minus)
+
     max_r = v_length - m_minus
     max_r = torch.mul(max_r, max_r)
     assert max_l.shape == (batch_size, 10, 1, 1)
 
-    # reshape: [batch_size, 10, 1, 1] => [batch_size, 10]
     max_l.data = max_l.data.view(batch_size, 10)
     max_r.data = max_r.data.view(batch_size, 10)
 
-    # calc T_c: [batch_size, 10]
     T_c = target
-    # [batch_size, 10], element-wise multiply
+
     L_c = torch.mul(T_c, max_l) + torch.mul(lambda_val, torch.mul((ones - T_c), max_r))
 
     margin_loss = torch.mean(torch.sum(L_c, dim=1))
