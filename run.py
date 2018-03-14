@@ -5,7 +5,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torchvision import datasets, transforms
 from torch.autograd import Variable
-from utils import ReluMarginloss
+from utils import ReluMarginloss, one_hot
 from model import CapNet
 
 
