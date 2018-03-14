@@ -1,16 +1,28 @@
 import numpy as np
-
+from utils import ReluMarginloss, one_hot, squash
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from torchvision import datasets, transforms
 from torch.autograd import Variable
+batch_size = 100
+routing_iter = 3
+
+
+
+epsilon = 1e-9
+batch_size = 100
+routing_iter = 3
+m_plus_value = 0.9
+m_minus_value = 0.1
+lambda_value = 0.5
 
 class CapNet(nn.Module):
     def __init__(self):
         super(CapNet, self).__init__()
 
+        # Conv1: [batch_size, 20, 20, 256]
         self.conv1 = nn.Conv2d(1, 256, kernel_size=9, stride=1)
 
         # Cpasule layer 1: [batch_size, 1152, 8, 1]
@@ -87,7 +99,9 @@ class CapNet(nn.Module):
                 s_J_sum = torch.sum(s_J, dim=1, keepdim=True) + self.bias
                 V_J = squash(s_J_sum)
 
+            # routing ieration
             if r_iter < routing_iter - 1:
+
                 u_hat_stopped_tmp = u_hat_stopped.data.numpy()
                 u_hat_stopped_tmp = np.reshape(u_hat_stopped_tmp, (batch_size, 1152, 10, 16, 1))
                 c_IJ_tmp = c_IJ.data.numpy()
@@ -102,4 +116,5 @@ class CapNet(nn.Module):
 
                 b_IJ.data += torch.Tensor(u_produce_v)
 
+        #print "Finished routing"
         return V_J

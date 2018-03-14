@@ -1,13 +1,21 @@
 import numpy as np
-
+from torchvision import datasets, transforms
+from torch.autograd import Variable
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-from torchvision import datasets, transforms
-from torch.autograd import Variable
 
 
+epsilon = 1e-9
+batch_size = 100
+routing_iter = 3
+m_plus_value = 0.9
+m_minus_value = 0.1
+lambda_value = 0.5
+
+
+batch_size = 100
 
 def one_hot(labels):
     out = []
