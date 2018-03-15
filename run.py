@@ -43,7 +43,7 @@ def train(train_data,model):
         data, target = Variable(data), Variable(target)
         optimizer.zero_grad()
         output, recon = model(data, target)
-        loss = ReluMarginloss(output, target, data, recon)
+        loss = ReluMarginloss((m_plus_value,m_minus_value,output, target, data, recon)
         loss.backward()
         optimizer.step()
         print("Epoch: {} batch_idx: {} Loss: {}".format(epoch,batch_idx,loss.data[0]))

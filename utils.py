@@ -16,32 +16,10 @@ def squash(vector,eps):
     vec_squared_norm = torch.sum((vector * vector), dim=-2, keepdim=True)
     scalar_factor = vec_squared_norm / (1 + vec_squared_norm) / torch.sqrt(vec_squared_norm + eps)
     return (scalar_factor * vector)
-def NLLloss(v_length, target):
-    v_length = v_length.view(batch_size, 10)
-    logits = F.log_softmax(v_length, dim=1)
-    loss = F.nll_loss(logits, target)
-    return loss
 
-def Marginloss(v_length, target):
-    m_plus = Variable(torch.Tensor(np.array(np.tile(m_plus_value, [batch_size, 10, 1, 1]))))
-    m_minus = Variable(torch.Tensor(np.array(np.tile(m_minus_value, [batch_size, 10, 1, 1]))))
-    lambda_val = Variable(torch.Tensor(np.array(np.tile(lambda_value, [batch_size, 10]))))
-    zero = Variable(torch.zeros(batch_size, 10, 1, 1))
-    ones = Variable(torch.ones(batch_size, 10))
-    max_l = m_plus - v_length
-    max_l = torch.mul(max_l, max_l)
-    max_r = v_length - m_minus
-    max_r = torch.mul(max_r, max_r)
-    max_l.data = max_l.data.view(batch_size, 10)
-    max_r.data = max_r.data.view(batch_size, 10)
-    T_c = target
-    L_c = torch.mul(T_c, max_l) + torch.mul(lambda_val, torch.mul((ones - T_c), max_r))
-    margin_loss = torch.mean(torch.sum(L_c, dim=1))
-    return margin_loss
-
-def ReluMarginloss(v_length, target, x, recon):
-    left = F.relu(0.9 - v_length, inplace=True) ** 2
-    right = F.relu(v_length - 0.1, inplace=True) ** 2
+def ReluMarginloss(m_plus_value,m_minus_value,v_length, target, x, recon):
+    left = F.relu(m_plus_value - v_length, inplace=True) ** 2
+    right = F.relu(v_length - m_minus_value, inplace=True) ** 2
     margin_loss = target * left + 0.5 * (1. - target) * right
     margin_loss = torch.mean(torch.sum(margin_loss, dim=1))
     recon_loss = nn.MSELoss(size_average=False)
