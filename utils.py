@@ -6,41 +6,25 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
-
-epsilon = 1e-9
-batch_size = 100
-routing_iter = 3
-m_plus_value = 0.9
-m_minus_value = 0.1
-lambda_value = 0.5
-
-
-batch_size = 100
-
 def one_hot(labels):
     out = []
     for i, label in enumerate(labels):
         out.append(np.zeros(10))
         out[i][label] = 1
-    assert np.array(out).shape == (batch_size, 10)
-
     return np.array(out)
-def squash(vector):
+def squash(vector,eps):
     vec_squared_norm = torch.sum((vector * vector), dim=-2, keepdim=True)
-    scalar_factor = vec_squared_norm / (1 + vec_squared_norm) / torch.sqrt(vec_squared_norm + epsilon)
+    scalar_factor = vec_squared_norm / (1 + vec_squared_norm) / torch.sqrt(vec_squared_norm + eps)
     return (scalar_factor * vector)
 def NLLloss(v_length, target):
     v_length = v_length.view(batch_size, 10)
     logits = F.log_softmax(v_length, dim=1)
     loss = F.nll_loss(logits, target)
     return loss
-
-# Margin loss function
 def MultiMarginloss(v_length, target):
     v_length.data = v_length.data.view(batch_size, 10)
     loss_pos = F.multi_margin_loss(v_length, target, p=2, margin=m_plus_value)
     loss_neg = F.multi_margin_loss(v_length, target, p=2, margin=m_minus_value)
-
     return loss_neg + loss_pos
 
 def Marginloss(v_length, target):
