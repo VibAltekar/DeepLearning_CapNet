@@ -13,48 +13,31 @@ class CapNet(nn.Module):
         self.batch_size = batch_size
         self.routing_iter = routing_iter
         self.epsilon = epsilon
-        # Conv1: [batch_size, 20, 20, 256]
         self.conv1 = nn.Conv2d(1, 256, kernel_size=9, stride=1)
-
-        # Cpasule layer 1: [batch_size, 1152, 8, 1]
         self.caps_1 = nn.Conv2d(256, 32*8, kernel_size=9, stride=2)
-
-        # Capsule layer 2: [batch_size, 10, 16, 1]
         w = torch.Tensor(1, 1152, 10, 8, 16)
         nn.init.normal(w)
         self.W = nn.Parameter(w)
         b = torch.zeros(1, 1, 10, 16, 1)
         self.bias = nn.Parameter(b)
-
-        # Reconstruction Layers
         self.recon_fc_1 = nn.Linear(16, 512)
         self.recon_fc_2 = nn.Linear(512, 1024)
         self.recon_fc_3 = nn.Linear(1024, 784)
-
-        # Debug flat and full-connected
         self.fc_debug_0 = nn.Linear(160, 50)
         self.fc_debug_1 = nn.Linear(50, 10)
 
     def forward(self, x, y):
-        # conv layer1
         x = F.relu(self.conv1(x))
-
-        # capsule layer1
         x = F.relu(self.caps_1(x))
-
-        # capsule layer2
         b_ij = Variable(torch.Tensor(self.batch_size, 1152, 10, 1, 1), requires_grad=False)
         x = self.routing(x, b_ij, self.W,batch_size=self.batch_size,routing_iter=self.routing_iter)
         x = torch.squeeze(x, dim=1)
-
-        # decoder layer
         v_length = torch.sqrt(torch.sum(torch.mul(x, x),
                                         dim=2, keepdim=True) + self.epsilon)
         v_length = v_length.view(self.batch_size, 10, 1, 1)
 
         masked_v = torch.matmul(torch.squeeze(x).view(self.batch_size, 16, 10), y.view(-1, 10, 1))
 
-        # reconstruction layer
         vector_j = masked_v.view(self.batch_size, 16)
         fc1 = self.recon_fc_1(vector_j)
         fc2 = self.recon_fc_2(fc1)
@@ -99,5 +82,4 @@ class CapNet(nn.Module):
 
                 b_IJ.data += torch.Tensor(u_produce_v)
 
-        #print "Finished routing"
         return V_J

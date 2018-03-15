@@ -8,6 +8,8 @@ from torch.autograd import Variable
 from utils import ReluMarginloss, one_hot
 from model import CapNet
 
+
+# Hyperparameters for CapNet
 epsilon = 1e-9
 batch_size = 100
 routing_iter = 3
@@ -45,7 +47,7 @@ def train(train_data,model):
         loss.backward()
         optimizer.step()
         print("Epoch: {} batch_idx: {} Loss: {}".format(epoch,batch_idx,loss.data[0]))
-        print("Training Complete")
+    print("Training Complete")
     return model
 
 def test(test_data,model):
