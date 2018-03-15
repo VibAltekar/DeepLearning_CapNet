@@ -62,9 +62,7 @@ def test(test_data,model):
     print("Testing Complete")
 
     test_loss /= len(test_data.dataset)
-    print('Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
-        test_loss, correct, len(test_data.dataset),
-        100. * correct / len(test_data.dataset)))
+    print('Loss: {}, Accuracy: {:.0f}%'.format(test_loss, 100. * correct / len(test_data.dataset)))
     return test_loss
 
 
