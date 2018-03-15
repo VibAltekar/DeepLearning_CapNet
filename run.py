@@ -10,13 +10,12 @@ from model import CapNet
 
 
 # Hyperparameters for CapNet
-epsilon = 1e-9
+epsilon = 0.0000000001
 batch_size = 100
 routing_iter = 3
 m_plus_value = 0.9
 m_minus_value = 0.1
 lambda_value = 0.5
-
 
 
 def load_data(data_loc="~/.data"):
@@ -27,7 +26,6 @@ def load_data(data_loc="~/.data"):
                        transforms.Normalize((0.1307,), (0.3081,))
                    ])),
     batch_size=batch_size, shuffle=True)
-
     test_loader = torch.utils.data.DataLoader(
                             datasets.MNIST(data_loc, train=False, transform=transforms.Compose([
                             transforms.ToTensor(),
